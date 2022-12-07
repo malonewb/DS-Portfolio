@@ -1,0 +1,254 @@
+---
+title: "Data Science in a Box Lab 5"
+author: "Alex Lindquist, Nate Smullen, Wynter Malone, Yadhira Garcia"
+date: "10/17/2022"
+output: html_notebook
+---
+
+##Load Packages
+
+```{r}
+library(tidyverse)
+library(dsbox)
+library(here)
+library(janitor)
+```
+
+##Alaska
+```{r}
+dn_ak <- dennys %>%
+  filter(state == "AK")
+nrow(dn_ak)
+```
+There are 3 Denny's in Alaska.
+
+```{r}
+lq_ak <- laquinta %>%
+  filter(state == "AK")
+nrow(lq_ak)
+```
+There are 2 LaQuintas in Alaska.
+
+```{r}
+dn_lq_ak <- full_join(dn_ak, lq_ak, by = "state")
+dn_lq_ak
+```
+There are 6 observations in this joined dataframe, as there are 3 Denny's and 2
+LaQuintas, so there are 6 total combinations of the two. The Denny's are 
+represented with .x variable names whereas the LaQuintas are represented with 
+the .y variable names.
+
+```{r}
+haversine <- function(long1, lat1, long2, lat2, round = 3) {
+  # convert to radians
+  long1 = long1 * pi / 180
+  lat1  = lat1  * pi / 180
+  long2 = long2 * pi / 180
+  lat2  = lat2  * pi / 180
+  
+  R = 6371 # Earth mean radius in km
+  
+  a = sin((lat2 - lat1)/2)^2 + cos(lat1) * cos(lat2) * sin((long2 - long1)/2)^2
+  d = R * 2 * asin(sqrt(a))
+  
+  return( round(d,round) ) # distance in km
+}
+```
+
+```{r}
+dn_lq_ak <- dn_lq_ak %>% mutate(distance = haversine(longitude.x, latitude.x, 
+                                                     longitude.y, latitude.y))
+```
+
+```{r}
+dn_lq_ak_mindist <- dn_lq_ak %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance))
+```
+
+```{r}
+summary(dn_lq_ak_mindist)
+dn_lq_ak_mindist %>% ggplot(aes(x=closest)) + geom_histogram()
+```
+There are only 3 data points, so it is difficult to describe the distribution.
+All of the Denny's have a LaQuinta within 6km.
+
+##North Carolina 
+```{r}
+dn_nc <- dennys %>%
+  filter(state == "NC")
+nrow(dn_nc)
+```
+There are 28 Denny's in North Carolina.
+
+```{r}
+lq_nc <- laquinta %>%
+  filter(state == "NC")
+nrow(lq_nc)
+```
+There are 12 LaQuintas in North Carolina.
+
+```{r}
+dn_lq_nc <- full_join(dn_nc, lq_nc, by = "state")
+dn_lq_nc
+```
+There are 336 observations in this joined dataframe, as there are 28 Denny's and 
+12 LaQuintas. The Denny's are represented with .x variable names whereas the 
+LaQuintas are represented with the .y variable names.
+
+
+```{r}
+dn_lq_nc <- dn_lq_nc %>% mutate(distance = haversine(longitude.x, latitude.x, 
+                                                     longitude.y, latitude.y))
+```
+
+```{r}
+dn_lq_nc_mindist <- dn_lq_nc %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance))
+```
+
+```{r}
+summary(dn_lq_nc_mindist)
+dn_lq_nc_mindist %>% ggplot(aes(x=closest)) + geom_histogram()
+```
+The distribution for the closest LaQuinta to each Denny's is skewed right.
+
+##Texas
+```{r}
+dn_tx <- dennys %>%
+  filter(state == "TX")
+nrow(dn_tx)
+```
+There are 200 Denny's in Texas.
+
+```{r}
+lq_tx <- laquinta %>%
+  filter(state == "TX")
+nrow(lq_tx)
+```
+There are 237 LaQuintas in Texas.
+
+```{r}
+dn_lq_tx <- full_join(dn_tx, lq_tx, by = "state")
+dn_lq_tx
+```
+There are 47,400 observations in this joined dataframe, as there are 200 Denny's
+and 237 LaQuintas. The Denny's are represented with .x variable names whereas
+the LaQuintas are represented with the .y variable names.
+
+
+```{r}
+dn_lq_tx <- dn_lq_tx %>% mutate(distance = haversine(longitude.x, latitude.x, 
+                                                     longitude.y, latitude.y))
+```
+
+```{r}
+dn_lq_tx_mindist <- dn_lq_tx %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance))
+```
+
+```{r}
+summary(dn_lq_tx_mindist)
+dn_lq_tx_mindist %>% ggplot(aes(x=closest)) + geom_histogram()
+```
+The distribution for the closest LaQuinta to each Denny's is skewed right, with
+a majority of the Denny's having a LaQuinta within 10 kilometers.
+
+##California
+```{r}
+dn_ca <- dennys %>%
+  filter(state == "CA")
+nrow(dn_ca)
+```
+There are 403 Denny's in California.
+
+```{r}
+lq_ca <- laquinta %>%
+  filter(state == "CA")
+nrow(lq_ca)
+```
+There are 56 LaQuintas in California.
+
+```{r}
+dn_lq_ca <- full_join(dn_ca, lq_ca, by = "state")
+dn_lq_ca
+```
+There are 22,568 observations in this joined dataframe, as there are 403 Denny's
+and 56 LaQuintas. The Denny's are represented with .x variable names whereas
+the LaQuintas are represented with the .y variable names.
+
+
+```{r}
+dn_lq_ca <- dn_lq_ca %>% mutate(distance = haversine(longitude.x, latitude.x, 
+                                                     longitude.y, latitude.y))
+```
+
+```{r}
+dn_lq_ca_mindist <- dn_lq_ca %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance))
+```
+
+```{r}
+summary(dn_lq_ca_mindist)
+dn_lq_ca_mindist %>% ggplot(aes(x=closest)) + geom_histogram()
+```
+The distribution for the closest LaQuinta to each Denny's is skewed right, with
+a majority of the Denny's having a LaQuinta within 25 kilometers.
+
+Among the states we have examined, Mitch Hedberg's joke most applies to Texas,
+as most of the observations have less than 10km in between. Alaska has the 
+closest, however there are only 3 Denny's, so it is harder to say if that is 
+significant, or just a byproduct of Alaska not having many Denny's restaurants.
+
+```{r}
+file = here("data_raw","FastFoodRestaurants.csv")
+ffr <- read_csv(file)
+```
+
+In order to determine if Mitch Hedberg's joke applies to just Denny's, or if it
+is just a byproduct of businesses being located in populated areas, we will 
+compare the distance between LaQuinta and Denny's to the distance between 
+LaQuinta and another fast food restaurant with a similar number of locations.
+Because most fast food restaurants have more locations than Denny's does in 
+many of the states we are looking at, we will perform a random sample of these
+fast food restaurants in order to have a fair comparison.
+
+```{r}
+mcd_nc <- ffr %>% 
+  rename(state = province) %>%
+  filter(state == "NC", name == "McDonald's") %>%
+  slice_sample(n=28)
+
+```
+
+```{r}
+mcd_lq_nc <- full_join(mcd_nc, lq_nc, by = "state")
+mcd_lq_nc
+```
+There are 336 observations in this joined dataframe, as there are 28 Denny's and 
+12 LaQuintas. The Denny's are represented with .x variable names whereas the 
+LaQuintas are represented with the .y variable names.
+
+
+```{r}
+mcd_lq_nc <- mcd_lq_nc %>% mutate(distance = haversine(longitude.x, latitude.x, 
+                                                     longitude.y, latitude.y))
+```
+
+```{r}
+mcd_lq_nc_mindist <- mcd_lq_nc %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance))
+```
+
+```{r}
+summary(mcd_lq_nc_mindist)
+mcd_lq_nc_mindist %>% ggplot(aes(x=closest)) + geom_histogram()
+
+summary(dn_lq_nc_mindist)
+dn_lq_nc_mindist %>% ggplot(aes(x=closest)) + geom_histogram()
+
+```

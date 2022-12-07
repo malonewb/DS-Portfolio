@@ -1,0 +1,119 @@
+---
+title: "Data Science in a Box Lab 4"
+author: "Alex Lindquist"
+date: "10/16/2022"
+output: html_notebook
+---
+
+##Load Packages
+
+```{r}
+library(tidyverse)
+library(dsbox)
+```
+
+```{r}
+file = here("data_raw","states.csv")
+states <- read_csv(file)
+```
+
+```{r}
+dfdenny <- dennys
+?dennys
+nrow(dennys)
+ncol(dennys)
+```
+1. There are 1643 rows each representing one Denny's restaurant location in the US. 
+There are 6 columns each representing a different attribute. The attributes are
+address, city, state, zip code, longitude and latitude of the restaurant.
+
+```{r}
+dflq <- laquinta
+?laquinta
+nrow(laquinta)
+ncol(laquinta)
+```
+2. There are 909 rows each representing one LaQuinta motel location in the US. 
+There are 6 columns each representing a different attribute. The attributes are
+address, city, state, zip code, longitude and latitude of the motel.
+
+3. There are several LaQuinta locations outside of the US, including in Canada,
+Mexico, China, New Zealand, Turkey, Chile, Columbia, and the UAE. On the Denny's
+website, there are no locations listed outside of the US.
+
+4. In order to determine if there are any locations outside of the US, you could
+take the data and filter based on longitude and latitude combinations that are
+inside of the US. You could filter based on state abbreviations that are from 
+the US, however it is possible that a city abbreviation from another country 
+could be the same as a state abbreviation from the US. However it is unlikely,
+and it may be easier to just use the city abbreviation.
+
+```{r}
+dennys %>%
+  filter(!(state %in% states$abbreviation))
+
+dfdenny %>%
+  mutate(country = "United States")
+```
+There are no Denny's outside of the US in this data set.
+
+```{r}
+laquinta %>%
+  filter(!(state %in% states$abbreviation))
+
+dflq <- dflq %>% mutate(country = case_when(
+    state %in% state.abb ~ "United States",
+    state %in% c("ON", "BC") ~ "Canada",
+    state == "ANT" ~ "Colombia",
+    state %in% c("NL", "AG", "QR", "CH", "VE", "PU", "SL") ~ "Mexico",
+    state == "FM" ~ "Honduras"))
+
+dflq <- dflq %>%
+  filter(country == "United States")
+```
+
+```{r}
+dfdenny %>%
+  count(state) %>%
+  inner_join(states, by = c("state" = "abbreviation")) %>%
+  mutate(per_square_mile = n / area) %>% 
+  arrange(-per_square_mile)
+```
+DC has the most Denny's per square mile.
+
+```{r}
+dflq %>%
+  count(state) %>%
+  inner_join(states, by = c("state" = "abbreviation")) %>%
+  mutate(per_square_mile = n / area) %>% 
+  arrange(-per_square_mile)
+```
+Rhode Island has the most LaQuintas per square mile.
+
+```{r}
+dfdenny <- dfdenny %>%
+  mutate(establishment = "Denny's")
+dflq <- dflq %>%
+  mutate(establishment = "La Quinta")
+
+dn_lq <- bind_rows(dfdenny, dflq)
+
+ggplot(dn_lq, mapping = aes(x = longitude, y = latitude, color = establishment)) +
+  geom_point()
+```
+
+```{r}
+dn_lq %>%
+  filter(state == "NC") %>% 
+  ggplot(dn_lq, mapping = aes(x = longitude, y = latitude, color = establishment)) +
+  geom_point(alpha = 0.5)
+```
+
+```{r}
+dn_lq %>%
+  filter(state == "TX") %>% 
+  ggplot(dn_lq, mapping = aes(x = longitude, y = latitude, color = establishment)) +
+  geom_point(alpha = 0.5)
+```
+
+

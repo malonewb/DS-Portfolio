@@ -1,0 +1,67 @@
+---
+## title: "Airplanes"
+## author: "Wynter Malone"
+## date: "2022-09-08"
+## output: html_notebook
+
+##load packages
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+##load flight data
+
+```{r}
+df1 = flights
+```
+
+##classwork
+
+```{r}
+df6 = df1
+  filter(dest=="MIA")
+
+df6 %>% ggplot(aes(month)) +geom_bar()
+```
+  
+## Analyzing the graph above, we note:
+  
+```{r}
+df7 = df1
+  filter(dest %in% c("LAX", "SAN", "SFO", "ATL", "ORD", "MIA"))
+
+df7 %>% ggplot(aes(month, fill(dest))) +geom_bar()
+```
+
+
+```{r}
+thisfile=here("data_raw","DL_SelectFields.zip")
+
+df2019=read_csv(thisfile) %>% clean_names()
+```
+
+```{r}
+
+df15 = df2019 %>% filter(passengers>0, origin == "LGA" | dest== "LGA") %>%
+  group_by(month, carrier_name)
+
+
+
+df15 %>% ggplot(aes(x=month, y=average_pass-per_flight, color=carrier_name))+geom_line()
+
+
+```
+
+##Some of the airlines don't fly certain months
+##One of the pink oneshas the most pass per flight in LGA, might have larger planes.
+##Plane companies on the lower half of the graph might be smaller planes/ private jets
+##most companies average around 40-60 or 100-120 passengers per flight
+##more passengers in the summer and Nov + Dec
+
+
+
+
